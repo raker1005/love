@@ -1,0 +1,20 @@
+{
+  "name": "Love Alarm",
+  "short_name": "Love Alarm",
+  "description": "연인과 알람을 공유하는 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "lifestyle"],
+  "lang": "ko"
+}
