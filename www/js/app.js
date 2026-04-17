@@ -919,6 +919,8 @@ function renderPartnerAlarmList() {
   let html = '';
   State.partnerAlarms.forEach(alarm => {
     const { ampm, time } = formatTime(alarm.hour, alarm.minute);
+    const isMyAdded = alarm.isPartnerAdded && alarm.createdBy === State.user?.uid;
+    const repeatLabel = getRepeatLabel(alarm.repeatDays || []);
     html += `
       <div class="partner-alarm-card" data-alarm-id="${alarm.alarmId}">
         <div class="partner-alarm-info">
@@ -927,9 +929,12 @@ function renderPartnerAlarmList() {
             <span class="alarm-time" style="font-size:38px;">${time}</span>
           </div>
           ${alarm.label ? `<div class="alarm-label">${alarm.label}</div>` : ''}
+          ${repeatLabel ? `<div class="alarm-repeat" style="color:var(--text-secondary);font-size:12px;">${repeatLabel}</div>` : ''}
+          ${isMyAdded ? `<div class="pa-added-badge">💕 내가 추가한 알람</div>` : ''}
           <div id="upload-status-${alarm.alarmId}" class="alarm-repeat"></div>
         </div>
         <div class="partner-alarm-actions">
+          ${isMyAdded ? `<button class="icon-btn delete-pa-btn" data-alarm-id="${alarm.alarmId}" title="알람 삭제" style="color: var(--accent-red);"><i class="fas fa-trash"></i></button>` : ''}
           <button class="icon-btn record-btn" data-alarm-id="${alarm.alarmId}" title="직접 녹음">
             <i class="fas fa-microphone"></i>
           </button>
@@ -947,6 +952,12 @@ function renderPartnerAlarmList() {
   });
   $$('.upload-btn').forEach(btn => {
     btn.addEventListener('click', () => pickAudioFile(btn.dataset.alarmId));
+  });
+  $$('.delete-pa-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('이 알람을 파트너 폰에서 삭제할까요?')) return;
+      await deletePartnerAlarm(btn.dataset.alarmId);
+    });
   });
 }
 
@@ -1140,9 +1151,147 @@ async function uploadSoundBytes(bytes, alarmId, ext = 'webm') {
   );
 }
 
+async function deletePartnerAlarm(alarmId) {
+  const fb = getFirebase();
+  if (!fb || !State.user || !State.myProfile?.connectedPartnerUid) return;
+  const { db, doc, deleteDoc } = fb;
+  const partnerUid = State.myProfile.connectedPartnerUid;
+  try {
+    await deleteDoc(doc(db, 'users', partnerUid, 'shared_alarms', alarmId));
+    showToast('알람이 삭제되었습니다');
+  } catch(e) {
+    showToast('삭제 실패: ' + e.message);
+  }
+}
+
 // ============================================================
-//  FIREBASE CONFIG ERROR
+//  PARTNER ALARM ADD (내가 파트너 폰에 알람 추가)
 // ============================================================
+let paHour = 7, paMinute = 0, paAmPm = 'AM';
+
+function openAddPartnerAlarmModal() {
+  if (!State.myProfile?.connectedPartnerUid) {
+    showToast('파트너와 연결된 후 사용하세요 💕');
+    return;
+  }
+  // 기본값 초기화
+  paHour = 7; paMinute = 0; paAmPm = 'AM';
+  updatePaTimePicker();
+  $('#pa-alarm-label').value = '';
+  $$('.pa-day-btn').forEach(b => b.classList.remove('selected'));
+  $('#add-partner-alarm-modal').classList.remove('hidden');
+}
+
+function closePaModal() {
+  $('#add-partner-alarm-modal').classList.add('hidden');
+}
+
+function updatePaTimePicker() {
+  $('#pa-tp-hour').textContent = pad(paHour === 0 ? 12 : paHour);
+  $('#pa-tp-minute').textContent = pad(paMinute);
+  $('#pa-tp-ampm').textContent = paAmPm === 'AM' ? '오전' : '오후';
+}
+
+async function savePartnerAlarm() {
+  const fb = getFirebase();
+  if (!fb || !State.user || !State.myProfile?.connectedPartnerUid) {
+    showToast('파트너 연결이 필요합니다');
+    return;
+  }
+
+  // 시간 계산
+  let hour24 = paHour % 12;
+  if (paAmPm === 'PM') hour24 += 12;
+  if (paAmPm === 'AM' && paHour === 12) hour24 = 0;
+
+  const label = $('#pa-alarm-label').value.trim() || '♥ 파트너의 알람';
+  const repeatDays = $$('.pa-day-btn.selected').map(b => parseInt(b.dataset.paDay));
+
+  const partnerUid = State.myProfile.connectedPartnerUid;
+  const alarmId = generateId();
+
+  const btn = $('#btn-pa-save');
+  const saveText = $('#pa-save-text');
+  const spinner = $('#pa-save-spinner');
+  btn.disabled = true;
+  saveText.classList.add('hidden');
+  spinner.classList.remove('hidden');
+
+  try {
+    const { db, doc, setDoc, collection } = fb;
+
+    // 파트너의 shared_alarms 컬렉션에 직접 알람 추가
+    await setDoc(doc(db, 'users', partnerUid, 'shared_alarms', alarmId), {
+      alarmId,
+      hour: hour24,
+      minute: paMinute,
+      label,
+      isEnabled: true,
+      repeatDays,
+      createdBy: State.user.uid,         // 누가 만들었는지 기록
+      createdByNickname: State.myProfile?.nickname || '파트너',
+      isPartnerAdded: true,              // 파트너가 추가한 알람임을 표시
+      createdAt: Date.now()
+    });
+
+    closePaModal();
+    showToast(`💕 ${State.partnerProfile?.nickname || '파트너'}에게 알람을 추가했어요!`);
+  } catch(e) {
+    console.error('파트너 알람 추가 실패:', e);
+    showToast('알람 추가에 실패했습니다: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    saveText.classList.remove('hidden');
+    spinner.classList.add('hidden');
+  }
+}
+
+function bindPaModalEvents() {
+  // 열기 버튼
+  $('#btn-add-partner-alarm').addEventListener('click', openAddPartnerAlarmModal);
+
+  // 취소 버튼
+  $('#btn-pa-cancel').addEventListener('click', closePaModal);
+
+  // 모달 배경 클릭 닫기
+  $('#add-partner-alarm-modal').addEventListener('click', e => {
+    if (e.target === $('#add-partner-alarm-modal')) closePaModal();
+  });
+
+  // 저장 버튼
+  $('#btn-pa-save').addEventListener('click', savePartnerAlarm);
+
+  // AM/PM 토글
+  $('#pa-tp-ampm').addEventListener('click', () => {
+    paAmPm = paAmPm === 'AM' ? 'PM' : 'AM';
+    updatePaTimePicker();
+  });
+
+  // 시간 조절 버튼들
+  $$('[data-pa-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.paAction;
+      if (action === 'hour-up')   { paHour = paHour >= 12 ? 1 : paHour + 1; }
+      if (action === 'hour-down') { paHour = paHour <= 1 ? 12 : paHour - 1; }
+      if (action === 'min-up')    { paMinute = paMinute >= 59 ? 0 : paMinute + 1; }
+      if (action === 'min-down')  { paMinute = paMinute <= 0 ? 59 : paMinute - 1; }
+      updatePaTimePicker();
+    });
+
+    // 롱프레스 빠른 변경
+    let iv;
+    btn.addEventListener('pointerdown', () => { iv = setInterval(() => btn.click(), 120); });
+    btn.addEventListener('pointerup',   () => clearInterval(iv));
+    btn.addEventListener('pointerleave',() => clearInterval(iv));
+  });
+
+  // 요일 버튼
+  $$('.pa-day-btn').forEach(btn => {
+    btn.addEventListener('click', () => btn.classList.toggle('selected'));
+  });
+}
+
+
 function showFirebaseConfigError() {
   showToast('⚠️ Firebase 설정을 완료해주세요', 4000);
 }
@@ -1374,6 +1523,7 @@ function bindEvents() {
 
   // --- Partner Alarms ---
   $('#btn-back-from-partner').addEventListener('click', goBack);
+  bindPaModalEvents();
 
   // --- Alarm Ringing ---
   $('#btn-ringing-stop').addEventListener('click', stopRinging);

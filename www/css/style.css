@@ -793,3 +793,119 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   transition: opacity 0.2s;
 }
 .alarm-card-wrap.swiping .swipe-indicator { opacity: 1; }
+
+/* ============================================================
+   파트너 알람 추가 모달 (Partner Alarm Add Modal)
+   ============================================================ */
+
+/* 시간 피커 */
+.partner-alarm-time-picker {
+  background: var(--bg3);
+  border-radius: 16px;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+}
+.pa-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.pa-time-row {
+  gap: 4px;
+  padding: 4px 0;
+}
+.pa-arrow-btn {
+  width: 56px; height: 36px;
+  background: transparent;
+  color: var(--text2);
+  font-size: 14px;
+  border-radius: 10px;
+  transition: background 0.15s, color 0.15s;
+}
+.pa-arrow-btn:active { background: var(--bg2); color: var(--accent-pink); }
+.pa-separator { width: 56px; }
+.pa-time-num {
+  font-size: 40px; font-weight: 700;
+  color: var(--text1);
+  width: 56px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.pa-colon {
+  font-size: 36px; font-weight: 700;
+  color: var(--text1); line-height: 1;
+  padding: 0 4px;
+}
+.pa-ampm-btn {
+  font-size: 15px; font-weight: 600;
+  color: var(--accent-pink);
+  background: rgba(255,45,85,0.12);
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  user-select: none;
+}
+.pa-ampm-btn:active { background: rgba(255,45,85,0.25); }
+
+/* 라벨 입력 */
+.pa-input-wrap { margin-bottom: 16px; }
+.pa-label-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 1.5px solid var(--bg3);
+  color: var(--text1);
+  font-size: 15px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.pa-label-input:focus { border-color: var(--accent-pink); }
+.pa-label-input::placeholder { color: var(--text3); }
+
+/* 반복 요일 */
+.pa-repeat-wrap { margin-bottom: 8px; }
+.pa-section-label {
+  font-size: 13px; font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+.pa-day-grid {
+  display: flex; gap: 6px; justify-content: center;
+}
+.pa-day-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--bg3);
+  color: var(--text2);
+  font-size: 13px; font-weight: 600;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.pa-day-btn.selected {
+  background: var(--accent-pink);
+  color: #fff;
+  transform: scale(1.08);
+}
+.pa-day-btn:active { transform: scale(0.93); }
+
+/* "내가 추가한 알람" 배지 */
+.pa-added-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 600;
+  color: var(--accent-pink);
+  background: rgba(255,45,85,0.12);
+  border-radius: 6px;
+  padding: 2px 8px;
+  margin-top: 4px;
+}
+
+/* --accent-red 변수 없을 경우 fallback */
+:root { --accent-red: #FF3B30; }
+
