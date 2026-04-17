@@ -30,18 +30,34 @@ jobs:
       - name: Install Node dependencies
         run: npm install
 
-      - name: Create capacitor.config.json if missing
+      - name: Prepare www folder
         run: |
-          if [ ! -f capacitor.config.json ]; then
-            echo '{
-              "appId": "com.example.lovealarm",
-              "appName": "Love Alarm",
-              "webDir": ".",
-              "server": {
-                "androidScheme": "https"
-              }
-            }' > capacitor.config.json
-          fi
+          mkdir -p www
+          cp index.html www/ 2>/dev/null || true
+          cp manifest.json www/ 2>/dev/null || true
+          cp sw.js www/ 2>/dev/null || true
+          cp -r css www/ 2>/dev/null || true
+          cp -r js www/ 2>/dev/null || true
+          cp -r icons www/ 2>/dev/null || true
+          echo "✅ www folder contents:"
+          ls -la www/
+
+      - name: Write capacitor.config.json
+        run: |
+          cat > capacitor.config.json << 'EOF'
+          {
+            "appId": "com.example.lovealarm",
+            "appName": "Love Alarm",
+            "webDir": "www",
+            "server": {
+              "androidScheme": "https"
+            },
+            "android": {
+              "allowMixedContent": true,
+              "backgroundColor": "#000000"
+            }
+          }
+          EOF
 
       - name: Add Android platform
         run: npx cap add android || echo "Android already added"
@@ -61,3 +77,6 @@ jobs:
           name: love-alarm-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+
+      - name: Build success message
+        run: echo "🎉 APK 빌드 성공! Artifacts에서 다운로드하세요."
