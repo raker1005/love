@@ -1,0 +1,30 @@
+{
+  "appId": "com.example.lovealarm",
+  "appName": "Love Alarm",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_alarm",
+      "iconColor": "#FF2D55",
+      "sound": "default"
+    },
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#000000",
+      "showSpinner": false
+    }
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#000000",
+    "minWebViewVersion": 55,
+    "buildOptions": {
+      "keystorePath": null,
+      "keystoreAlias": null
+    }
+  }
+}
