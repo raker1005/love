@@ -1,0 +1,71 @@
+name: 🔨 Love Alarm APK Build
+     2	
+     3	on:
+     4	  push:
+     5	    branches: [ main, master ]
+     6	  pull_request:
+     7	    branches: [ main, master ]
+     8	  workflow_dispatch:  # 수동 실행도 가능
+     9	
+    10	jobs:
+    11	  build-apk:
+    12	    name: Build Android APK
+    13	    runs-on: ubuntu-latest
+    14	
+    15	    steps:
+    16	      # 1. 코드 체크아웃
+    17	      - name: 📥 Checkout repository
+    18	        uses: actions/checkout@v4
+    19	
+    20	      # 2. Node.js 설정
+    21	      - name: 🟢 Setup Node.js
+    22	        uses: actions/setup-node@v4
+    23	        with:
+    24	          node-version: '18'
+    25	          cache: 'npm'
+    26	
+    27	      # 3. Java 17 설정
+    28	      - name: ☕ Setup Java 17
+    29	        uses: actions/setup-java@v4
+    30	        with:
+    31	          java-version: '17'
+    32	          distribution: 'temurin'
+    33	
+    34	      # 4. Android SDK 설정
+    35	      - name: 📱 Setup Android SDK
+    36	        uses: android-actions/setup-android@v3
+    37	
+    38	      # 5. npm 패키지 설치
+    39	      - name: 📦 Install dependencies
+    40	        run: npm install
+    41	
+    42	      # 6. Capacitor Android 플랫폼 추가
+    43	      - name: ➕ Add Android platform
+    44	        run: |
+    45	          npx cap add android || echo "Android platform already exists"
+    46	
+    47	      # 7. 웹 파일을 Android로 동기화
+    48	      - name: 🔄 Sync Capacitor
+    49	        run: npx cap sync android
+    50	
+    51	      # 8. Gradle 권한 부여
+    52	      - name: 🔑 Grant Gradle execute permission
+    53	        run: chmod +x android/gradlew
+    54	
+    55	      # 9. APK 빌드
+    56	      - name: 🏗️ Build Debug APK
+    57	        run: |
+    58	          cd android
+    59	          ./gradlew assembleDebug --no-daemon --stacktrace
+    60	
+    61	      # 10. APK 업로드 (다운로드 가능하게)
+    62	      - name: 📤 Upload APK artifact
+    63	        uses: actions/upload-artifact@v4
+    64	        with:
+    65	          name: love-alarm-debug-apk
+    66	          path: android/app/build/outputs/apk/debug/app-debug.apk
+    67	          retention-days: 30
+    68	
+    69	      # 11. 빌드 성공 알림
+    70	      - name: ✅ Build Success
+    71	        run: echo "🎉 APK 빌드 성공! Actions 탭에서 Artifacts를 다운로드하세요."
