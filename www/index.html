@@ -137,8 +137,8 @@
     <!-- ====== SCREEN: CONNECTION ====== -->
     <div id="screen-connection" class="screen">
       <header class="top-bar">
-        <button class="top-btn" id="btn-back-from-connection">
-          <i class="fas fa-arrow-left"></i>
+        <button class="top-btn" id="btn-back-from-connection" style="color:var(--blue);">
+          <i class="fas fa-chevron-left"></i>
         </button>
         <h1 class="top-title">연결</h1>
         <div style="width:40px;"></div>
@@ -273,8 +273,8 @@
     <!-- ====== SCREEN: PARTNER ALARMS ====== -->
     <div id="screen-partner-alarms" class="screen">
       <header class="top-bar">
-        <button class="top-btn" id="btn-back-from-partner">
-          <i class="fas fa-arrow-left"></i>
+        <button class="top-btn" id="btn-back-from-partner" style="color:var(--blue);">
+          <i class="fas fa-chevron-left"></i>
         </button>
         <h1 class="top-title" id="partner-screen-title">파트너의 알람</h1>
         <div style="width:40px;"></div>
@@ -287,8 +287,8 @@
         </div>
 
         <!-- 파트너에게 알람 추가 버튼 -->
-        <button class="primary-btn pink-btn" id="btn-add-partner-alarm" style="margin: 0 16px 16px; width: calc(100% - 32px);">
-          <i class="fas fa-plus-circle" style="margin-right: 8px;"></i>파트너에게 알람 추가
+        <button class="primary-btn pink-btn" id="btn-add-partner-alarm" style="margin: 8px 16px 12px; width: calc(100% - 32px);">
+          <i class="fas fa-plus"></i> 파트너에게 알람 추가하기
         </button>
 
         <div id="partner-alarm-list-empty" class="empty-state hidden">
@@ -330,30 +330,60 @@
 
   <!-- ==================== 파트너 알람 추가 모달 ==================== -->
   <div id="add-partner-alarm-modal" class="modal-overlay hidden">
-    <div class="modal-box" style="max-width: 360px; width: 90%;">
-      <div class="modal-icon" style="background: linear-gradient(135deg, #FF2D55, #FF6B8A); margin-bottom: 12px;">
-        <i class="fas fa-heart" style="color: white; font-size: 22px;"></i>
+    <div class="modal-box" style="max-width: 430px;">
+      <div class="pa-modal-handle"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+        <div class="modal-icon" style="background: linear-gradient(135deg, #FF2D55, #FF6B8A); margin: 0; width:48px; height:48px; border-radius:14px; font-size:22px; flex-shrink:0;">
+          <i class="fas fa-heart" style="color:white;"></i>
+        </div>
+        <div>
+          <h3 class="modal-title" style="text-align:left;margin-bottom:2px;font-size:18px;">파트너에게 알람 추가</h3>
+          <p style="font-size:13px;color:var(--text3);">파트너 폰에 알람을 직접 설정해요</p>
+        </div>
       </div>
-      <h3 class="modal-title">💕 파트너에게 알람 추가</h3>
-      <p class="modal-desc" style="margin-bottom: 16px;">파트너의 폰에 알람을 직접 설정해드려요!</p>
 
       <!-- 시간 선택 -->
       <div class="partner-alarm-time-picker">
-        <div class="pa-picker-row">
-          <button class="pa-arrow-btn" data-pa-action="hour-up"><i class="fas fa-chevron-up"></i></button>
-          <span class="pa-separator"></span>
-          <button class="pa-arrow-btn" data-pa-action="min-up"><i class="fas fa-chevron-up"></i></button>
-        </div>
-        <div class="pa-picker-row pa-time-row">
-          <span id="pa-tp-ampm" class="pa-ampm-btn">오전</span>
-          <span id="pa-tp-hour" class="pa-time-num">07</span>
-          <span class="pa-colon">:</span>
-          <span id="pa-tp-minute" class="pa-time-num">00</span>
-        </div>
-        <div class="pa-picker-row">
-          <button class="pa-arrow-btn" data-pa-action="hour-down"><i class="fas fa-chevron-down"></i></button>
-          <span class="pa-separator"></span>
-          <button class="pa-arrow-btn" data-pa-action="min-down"><i class="fas fa-chevron-down"></i></button>
+        <div class="pa-time-columns">
+
+          <!-- 오전/오후 열 -->
+          <div class="pa-col">
+            <div class="pa-col-label">오전/오후</div>
+            <button class="pa-arrow-btn" data-pa-action="ampm-toggle">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <span id="pa-tp-ampm" class="pa-ampm-btn">오전</span>
+            <button class="pa-arrow-btn" data-pa-action="ampm-toggle">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+
+          <!-- 시 열 -->
+          <div class="pa-col">
+            <div class="pa-col-label">시</div>
+            <button class="pa-arrow-btn" data-pa-action="hour-up">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <span id="pa-tp-hour" class="pa-time-num">07</span>
+            <button class="pa-arrow-btn" data-pa-action="hour-down">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+
+          <div class="pa-colon">:</div>
+
+          <!-- 분 열 -->
+          <div class="pa-col">
+            <div class="pa-col-label">분</div>
+            <button class="pa-arrow-btn" data-pa-action="min-up">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <span id="pa-tp-minute" class="pa-time-num">00</span>
+            <button class="pa-arrow-btn" data-pa-action="min-down">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -377,10 +407,11 @@
       </div>
 
       <!-- 버튼 -->
-      <div class="modal-actions" style="margin-top: 16px;">
+      <div class="modal-actions" style="margin-top: 20px;">
         <button class="modal-cancel-btn" id="btn-pa-cancel">취소</button>
-        <button class="modal-confirm-btn" id="btn-pa-save" style="background: linear-gradient(135deg, #FF2D55, #FF6B8A);">
-          <span id="pa-save-text">💕 알람 보내기</span>
+        <button class="modal-confirm-btn" id="btn-pa-save" style="background: linear-gradient(135deg, #FF2D55, #FF6B8A); box-shadow: 0 8px 24px rgba(255,45,85,0.35);">
+          <i class="fas fa-heart" style="font-size:14px;"></i>
+          <span id="pa-save-text">알람 보내기</span>
           <span id="pa-save-spinner" class="btn-spinner hidden"></span>
         </button>
       </div>

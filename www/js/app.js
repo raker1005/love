@@ -178,6 +178,7 @@ function buildAlarmCardHTML(alarm) {
   const { ampm, time } = formatTime(alarm.hour, alarm.minute);
   const repeatLabel = getRepeatLabel(alarm.repeatDays);
   const disabledClass = alarm.isEnabled ? '' : 'disabled-card';
+  const activeStyle = alarm.isEnabled ? 'style="box-shadow:inset 0 0 0 0.5px var(--sep), inset 3px 0 0 var(--pink);"' : '';
   const partnerBadge = alarm.partnerSoundUri
     ? `<div class="alarm-partner-badge"><i class="fas fa-heart"></i> 파트너 알람음</div>`
     : '';
@@ -186,7 +187,7 @@ function buildAlarmCardHTML(alarm) {
     <div class="alarm-card-wrap" data-id="${alarm.id}">
       <div class="alarm-card-delete-bg"><i class="fas fa-trash"></i></div>
       <div class="alarm-card-inner">
-        <div class="alarm-card ${disabledClass}" data-id="${alarm.id}">
+        <div class="alarm-card ${disabledClass}" data-id="${alarm.id}" ${activeStyle}>
           <div class="alarm-card-left">
             <div class="alarm-time-row">
               <span class="alarm-ampm">${ampm}</span>
@@ -1261,20 +1262,15 @@ function bindPaModalEvents() {
   // 저장 버튼
   $('#btn-pa-save').addEventListener('click', savePartnerAlarm);
 
-  // AM/PM 토글
-  $('#pa-tp-ampm').addEventListener('click', () => {
-    paAmPm = paAmPm === 'AM' ? 'PM' : 'AM';
-    updatePaTimePicker();
-  });
-
-  // 시간 조절 버튼들
+  // 시간 조절 버튼들 (AM/PM 토글 포함)
   $$('[data-pa-action]').forEach(btn => {
     btn.addEventListener('click', () => {
       const action = btn.dataset.paAction;
-      if (action === 'hour-up')   { paHour = paHour >= 12 ? 1 : paHour + 1; }
-      if (action === 'hour-down') { paHour = paHour <= 1 ? 12 : paHour - 1; }
-      if (action === 'min-up')    { paMinute = paMinute >= 59 ? 0 : paMinute + 1; }
-      if (action === 'min-down')  { paMinute = paMinute <= 0 ? 59 : paMinute - 1; }
+      if (action === 'ampm-toggle') { paAmPm = paAmPm === 'AM' ? 'PM' : 'AM'; }
+      if (action === 'hour-up')     { paHour = paHour >= 12 ? 1 : paHour + 1; }
+      if (action === 'hour-down')   { paHour = paHour <= 1 ? 12 : paHour - 1; }
+      if (action === 'min-up')      { paMinute = paMinute >= 59 ? 0 : paMinute + 1; }
+      if (action === 'min-down')    { paMinute = paMinute <= 0 ? 59 : paMinute - 1; }
       updatePaTimePicker();
     });
 
